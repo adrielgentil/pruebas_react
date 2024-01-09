@@ -1,57 +1,47 @@
-import logo from './logo.svg';
+import { useEffect, useState } from 'react'
 import './App.css';
 import Pelicula from './pelicula';
 import PageWrapper from './PageWrapper';
+import Pagination from './pagination';
 
 function App() {
-  let peliculas = [
-    {
-      title: 'oblivion',
-      year:'2012',
-      score:'8.1',
-      director:'Joss Whedon',
-      release:'1 May 2015',
-      duration:'2h21',
-      cast:'Robert Downey Jr., Chris Evans, Chris Hemsworth',
-      image:'images/uploads/mv1.jpg'
-    },
-    {
-      title: 'into the wild',
-      year:'2014',
-      score:'7.8',
-      director:'Anthony Russo, Joe Russo',
-      release:'1 May 2015',
-      duration:'2h21',
-      cast:'Samuel L. Jackson, Chris Evans, Scarlett Johansson',
-      image:'images/uploads/mv2.jpg'
-    },
-    {
-      title: 'blade runner',
-      year:'2015',
-      score:'7.3',
-      director:'Peyton Reed',
-      release:'1 May 2015',
-      duration:'2h21',
-      cast:'Paul Rudd, Michael Douglas',
-      image:'images/uploads/mv3.jpg'
-    }
-  ]
+  const [currentPage, setCurrentPage] = useState(1)
+  const [movies, setMovies] = useState([])
+  const TOTAL_PER_PAGE = 2
+
+  useEffect(() => {
+      searchMovies();
+  },[])
+
+  const searchMovies = async () => {
+    let url = 'https://cors-anywhere.herokuapp.com/https://raw.githubusercontent.com/lucasmoy-dev/Curso-de-React/main/Proyecto%202%20-%20Web%20de%20Peliculas/Proyecto%20Terminado/src/peliculas.json'
+    let response = await fetch(url, {
+      "method": 'GET',
+      "headers": {
+        "Accept": 'application/json',
+        "Content-Type": 'application/json',
+        "Origin": 'https://raw.githubusercontent.com/'
+      }
+    })
+      let json = await response.json()
+      setMovies(json)
+  }
+
+  let moviesPagination = movies.slice((currentPage - 1) * TOTAL_PER_PAGE, (currentPage * TOTAL_PER_PAGE))
+
   return (
     <PageWrapper>
-      <Pelicula title='oblivion' year='2012' score='8.1' director='Joss Whedon' release='1 May 2015' duration='2h21'
-        cast='Robert Downey Jr., Chris Evans, Chris Hemsworth' image='images/uploads/mv1.jpg'>
-        Earth's mightiest heroes must come together and learn to fight as a team if they are to stop the mischievous Loki and his alien army from enslaving humanity...
-      </Pelicula>
+      {moviesPagination.map((pelicula) =>
+        <Pelicula title={pelicula.titulo} score={pelicula.calificacion} director={pelicula.director} release={pelicula.fecha} duration={pelicula.duration}
+          cast={pelicula.actores} image={pelicula.img}>
+          {pelicula.descripcion}
+        </Pelicula>
+      )}
 
-      <Pelicula title='into the wild' year='2014' score='7.8' director='Anthony Russo, Joe Russo' release='1 May 2015' duration='2h21'
-        cast='Samuel L. Jackson, Chris Evans, Scarlett Johansson' image='images/uploads/mv2.jpg'>
-        As Steve Rogers struggles to embrace his role in the modern world, he teams up with a fellow Avenger and S.H.I.E.L.D agent, Black Widow, to battle a new threat...
-      </Pelicula>
+      <Pagination page={currentPage} total={Math.ceil(movies.length / TOTAL_PER_PAGE)} onChange={(page) => {
+        setCurrentPage(page)
+      }} />
 
-      <Pelicula title='blade runner' year='2015' score='7.3' director='Peyton Reed' release='1 May 2015' duration='2h21'
-        cast='Paul Rudd, Michael Douglas' image='images/uploads/mv3.jpg'>
-        As Steve Rogers struggles to embrace his role in the modern world, he teams up with a fellow Avenger and S.H.I.E.L.D agent, Black Widow, to battle a new threat...
-      </Pelicula>
     </PageWrapper>
 
   );
